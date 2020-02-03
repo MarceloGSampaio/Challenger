@@ -1,12 +1,10 @@
 package monitora.features.training.models;
 
-import java.util.Date;
-
 public class Author {
     private String name;
-    private Date birth;
+    private String birth;
 
-    public Author(String name, Date birth) {
+    public Author(String name, String birth) {
         this.name = name;
         this.birth = birth;
     }
@@ -18,11 +16,11 @@ public class Author {
         this.name = name;
     }
 
-    public Date getBirth() {
+    public String getBirth() {
         return birth;
     }
 
-    public void setBirth(Date birth) {
+    public void setBirth(String birth) {
         this.birth = birth;
     }
 }
