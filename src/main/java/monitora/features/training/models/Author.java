@@ -1,26 +1,42 @@
 package monitora.features.training.models;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
+import java.util.Date;
 
+@Entity
 public class Author {
+    @Id
+    private Integer id;
+    @NotEmpty(message = "Campo nome é obrigatório")
     private String name;
-    private String birth;
+    //@JsonFormat(pattern = "yyyy-MM-dd") format configured in application.properties
+    private Date birth;
 
-    public Author(String name, String birth) {
-        this.name = name;
-        this.birth = birth;
+    public Author() {
     }
 
-    public String getName() {      return name;
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getBirth() {
+    public Date getBirth() {
         return birth;
     }
 
-    public void setBirth(String birth) {
+    public void setBirth(Date birth) {
         this.birth = birth;
     }
 }
