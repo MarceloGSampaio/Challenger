@@ -4,66 +4,51 @@ import monitora.features.training.erros.ResourceNotFoundException;
 import monitora.features.training.models.Author;
 import monitora.features.training.repository.AuthorsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/authors")
 public class ControlerAuthorData {
 
     @Autowired
-    AuthorsRepository authorsDAO;
+    AuthorsRepository authorsRepository;
 
-    @GetMapping("/all")
-    public List<Author> getAll(){
-        return authorsDAO.findAll();
+    @GetMapping("/authors")
+    public Page<Author> getAllAuthors(Pageable pageable) {
+        return authorsRepository.findAll(pageable);
     }
 
-    @GetMapping("/{id}")
-    public Optional<Author> getAuthorById(@PathVariable Integer id){
-        verifyIfAuthorExists(id);
-        Optional<Author> author = authorsDAO.findById(id);
-        return author;
+    @GetMapping("/authors/{authorId}")
+    public Author getAuthorById(@PathVariable Integer authorId) {
+        return authorsRepository.findById(authorId).
+                orElseThrow(() -> new ResourceNotFoundException("AuthorId " + authorId + " not found"));
     }
 
-    @PostMapping
-    @Transactional(rollbackOn = Exception.class)
-    public ResponseEntity<?> save(@Valid @RequestBody Author author) {
-        verifyIfAuthorNotExists(author.getId());
-        return new ResponseEntity<>(authorsDAO.save(author), HttpStatus.CREATED);
+
+    @PostMapping("/authors")
+    public Author createAuthor(@Valid @RequestBody Author author) {
+        return authorsRepository.save(author);
     }
 
-    @DeleteMapping(path = "/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
-        verifyIfAuthorExists(id);
-        authorsDAO.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PutMapping("/authors/{authorId}")
+    public Author updateAuthor (@PathVariable Integer authorId, @Valid @RequestBody Author authorRequest){
+        return authorsRepository.findById(authorId).map(author -> {
+            author.setName(authorRequest.getName());
+            author.setBirth(authorRequest.getBirth());
+            return authorsRepository.save(author);
+        }).orElseThrow(() -> new ResourceNotFoundException("AuthorId " + authorId + " not found"));
     }
 
-    @PutMapping(path = "/{id}")
-    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Author author) {
-        verifyIfAuthorExists(id);
-        author.setId(id);
-        authorsDAO.save(author);
-        return new ResponseEntity<>(author, HttpStatus.OK);
+    @DeleteMapping("/authors/{authorId}")
+    public ResponseEntity<?> deleteAuthor (@PathVariable Integer authorId){
+        return authorsRepository.findById(authorId).map(author -> {
+            authorsRepository.delete(author);
+            return ResponseEntity.ok().build();
+        }).orElseThrow(() -> new ResourceNotFoundException("AuthorId " + authorId + " not found"));
     }
-
-    private void verifyIfAuthorExists(Integer id) {
-        if (Objects.equals(authorsDAO.findById(id), Optional.empty()))
-            throw new ResourceNotFoundException("Author not found for ID: " + id);
-    }
-
-    private void verifyIfAuthorNotExists(Integer id) {
-        if (!Objects.equals(authorsDAO.findById(id), Optional.empty()))
-            throw new ResourceNotFoundException("Author found for ID: " + id);
-    }
-
 
 }

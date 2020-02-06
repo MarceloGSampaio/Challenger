@@ -1,14 +1,20 @@
 package monitora.features.training.models;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.validation.constraints.NotEmpty;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 @Entity
+@Table(name = "author")
 public class Author {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    @NotEmpty(message = "Campo nome é obrigatório")
+
+    @NotNull(message = "Campo nome é obrigatório")
+    @Column(unique = true)
+    @Size(max=40)
     private String name;
     //@JsonFormat(pattern = "yyyy-MM-dd") format configured in application.properties
     private Date birth;
